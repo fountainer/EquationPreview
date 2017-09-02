@@ -5,9 +5,10 @@ import re
 import requests
 import struct
 
-# copy from http://jamesgregson.blogspot.com/2013/06/latex-formulas-as-images-using-python.html
+
+# http://jamesgregson.blogspot.com/2013/06/latex-formulas-as-images-using-python.html
 def formula_as_file(formula, file):
-    url = 'http://latex.codecogs.com/png.latex?\dpi{{300}} \\bg_white {}'.format(formula)
+    url = 'http://latex.codecogs.com/gif.latex?\dpi{{300}} \\bg_white {}'.format(formula)
     r = requests.get(url)
     path = os.path.dirname(file)
     if path:
@@ -16,16 +17,14 @@ def formula_as_file(formula, file):
         f.write(r.content)
 
 # https://stackoverflow.com/questions/8032642/how-to-obtain-image-size-using-standard-python-class-without-using-external-lib
-# can not get the size of the figure when equation is invalid 
+# gif image
 def get_image_size(file):
     width, height = None, None
     with open(file, "rb") as f:
         head = f.read(24)
         if (len(head) == 24):
-            # must be png
-            check = struct.unpack('>i', head[4:8])[0]
-            if check == 0x0d0a1a0a:
-                width, height = struct.unpack('>ii', head[16:24])
+            # must be gif
+            width, height = struct.unpack('<HH', head[6:10])
     return width, height
 
 
@@ -65,6 +64,10 @@ class EquationPreview(sublime_plugin.TextCommand):
                 row_down = row_down + 1
                 text_down = text_line(view, row_down)
             formula = re.sub(r"#", "", text_combine)
+            # if not search two character $, assume that it's not a formula 
+            if (not re.search(r"\$+", text_line(view, row_up))
+                    or not re.search(r"\$+", text_line(view, row_down))):
+                formula = None
         else:
             formula = match_obj.group(0)[1:-1]
         return formula
@@ -74,10 +77,11 @@ class EquationPreview(sublime_plugin.TextCommand):
         if not formula:
             return
         tmp_path = os.path.join(sublime.packages_path(), "EquationPreview", "tmp")
-        file = hashlib.md5(formula.encode('utf-8')).hexdigest() + ".png"
+        file = hashlib.md5(formula.encode('utf-8')).hexdigest() + ".gif"
         path_file = os.path.join(tmp_path, file)
         formula_as_file(formula, path_file)
         width, height = get_image_size(path_file)
+        print(width, height)
         content = '<img src="file://{}", width={}, height={}>'.format(path_file, width, height)
 
         def on_hide():

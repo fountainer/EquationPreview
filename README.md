@@ -1,6 +1,5 @@
 A Sublime Text plugins to preview Latex Equation in comment line or block.
-The equation image is downloaded from [Online Equation editor]
-(https://www.sublimetext.com/docs/3/minihtml.html).
+The equation image is downloaded from [Online Equation editor](https://www.sublimetext.com/docs/3/minihtml.html).
 
 ### Usage
 
@@ -18,7 +17,7 @@ def test():
 # \begin{align*}
 #   a_{11}x_1 + a_{12}x_2 = c1 \\
 #   a_{21}x_1 + a_{22}x_2 = c2
-#  \end{align*}
+# \end{align*}
 # $$
 def test2():
     print("hello world!")
@@ -26,6 +25,8 @@ def test2():
 
 ### To DO
 
-- The display quality of the equation image is poor. 
-- Can not get the size of the image for an invalid equation.
+- The display quality of the equation image is poor.
+  Not use `show_popup` properly?
 - Use local LaTex engine to convert LaTex equations.
+- Cache images. 
+- Sometimes `FileNotFoundError` occurs when delete images.
