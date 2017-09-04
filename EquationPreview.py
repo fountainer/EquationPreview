@@ -4,6 +4,7 @@ import os
 import re
 import requests
 import struct
+import time
 
 
 # http://jamesgregson.blogspot.com/2013/06/latex-formulas-as-images-using-python.html
@@ -53,13 +54,16 @@ class EquationPreview(sublime_plugin.TextCommand):
             text_combine = ""
             # col must be 0, otherwise 
             while (not re.search(r"\$+", text_up) and
-                    "comment" in scope_name_line(view, row_up)):
+                    "comment" in scope_name_line(view, row_up) and 
+                    row_up >= 0):
                 text_combine = text_up + text_combine
                 row_up = row_up - 1
                 text_up = text_line(view, row_up)
-                
+            
+            max_line_num, _ = view.rowcol(view.size())
             while (not re.search(r"\$+", text_down) and
-                    "comment" in scope_name_line(view, row_down)):
+                    "comment" in scope_name_line(view, row_down) and 
+                    row_down <= max_line_num):
                 text_combine = text_combine + text_down
                 row_down = row_down + 1
                 text_down = text_line(view, row_down)
